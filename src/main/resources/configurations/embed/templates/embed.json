@@ -1,0 +1,27 @@
+{
+  "color": "",
+  "thumbnail": "",
+  "title": {
+    "text": "",
+    "url": ""
+  },
+  "author": {
+    "text": "",
+    "url": "",
+    "icon_url": ""
+  },
+  "description": "",
+  "image_url": "",
+  "footer": {
+    "text": "",
+    "icon_url": "",
+    "timestamp": ""
+  },
+  "fields": [
+    {
+      "title": "",
+      "text": "",
+      "inline": true
+    }
+  ]
+}
