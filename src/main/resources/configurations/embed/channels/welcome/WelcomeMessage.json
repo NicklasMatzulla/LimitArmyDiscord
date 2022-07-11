@@ -1,0 +1,18 @@
+{
+  "color": "#31639c",
+  "title": {
+    "text": "•● Willkommen auf unserem Discord!"
+  },
+  "fields": [
+    {
+      "title": ">>> <infoDot> Wir sind die LimitArmy!",
+      "text": ">>> Die LimitArmy ist ein deutschsprachiger\\nClash of Clans Clan. Damit du Zugriff auf\\nalle Funktionen erhälst, musst du unsere\\n<#995341317209067562> akzeptieren. In\\n<#995347132267634788> erfährst du mehr über\\ndie LimitArmy.",
+      "inline": false
+    }
+  ],
+  "footer": {
+    "text": "•● LimitArmy",
+    "icon_url": "<botAvatar>",
+    "timestamp": "<now>"
+  }
+}

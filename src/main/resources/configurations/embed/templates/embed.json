@@ -11,17 +11,17 @@
     "icon_url": ""
   },
   "description": "",
-  "image_url": "",
-  "footer": {
-    "text": "",
-    "icon_url": "",
-    "timestamp": ""
-  },
   "fields": [
     {
       "title": "",
       "text": "",
       "inline": true
     }
-  ]
+  ],
+  "image_url": "",
+  "footer": {
+    "text": "",
+    "icon_url": "",
+    "timestamp": ""
+  }
 }

@@ -1,9 +1,14 @@
 package de.nicklasmatzulla.limitarmydiscord.config.util;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import de.nicklasmatzulla.limitarmydiscord.config.entries.SettingsConfiguration;
+import de.nicklasmatzulla.limitarmydiscord.discord.DiscordBot;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.TextChannel;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,17 +39,17 @@ public class JsonEmbedBuilder {
         }
         if (json.has("thumbnail")) {
             final JsonPrimitive thumbnailObj = json.get("thumbnail").getAsJsonPrimitive();
-            embed.setThumbnail(thumbnailObj.getAsString());
+            embed.setThumbnail(replaceVariables(thumbnailObj.getAsString()));
         }
         if (json.has("title")) {
             final JsonObject titleObj = json.get("title").getAsJsonObject();
             if (titleObj.has("text") && titleObj.has("url")) {
                 final JsonPrimitive textObj = titleObj.get("text").getAsJsonPrimitive();
                 final JsonPrimitive urlObj = titleObj.get("url").getAsJsonPrimitive();
-                embed.setTitle(textObj.getAsString(), urlObj.getAsString());
+                embed.setTitle(replaceVariables(textObj.getAsString()), replaceVariables(urlObj.getAsString()));
             } else if (titleObj.has("text")) {
                 final JsonPrimitive textObj = titleObj.get("text").getAsJsonPrimitive();
-                embed.setTitle(textObj.getAsString());
+                embed.setTitle(replaceVariables(textObj.getAsString()));
             }
         }
         if (json.has("author")) {
@@ -53,33 +58,45 @@ public class JsonEmbedBuilder {
                 final JsonPrimitive textObj = authorObj.get("text").getAsJsonPrimitive();
                 final JsonPrimitive urlObj = authorObj.get("url").getAsJsonPrimitive();
                 final JsonPrimitive iconUrlObj = authorObj.get("icon_url").getAsJsonPrimitive();
-                embed.setAuthor(textObj.getAsString(), urlObj.getAsString(), iconUrlObj.getAsString());
+                embed.setAuthor(replaceVariables(textObj.getAsString()), replaceVariables(urlObj.getAsString()), replaceVariables(iconUrlObj.getAsString()));
             } else if (authorObj.has("text") && authorObj.has("icon_url")) {
                 final JsonPrimitive textObj = authorObj.get("text").getAsJsonPrimitive();
                 final JsonPrimitive urlObj = authorObj.get("url").getAsJsonPrimitive();
-                embed.setAuthor(textObj.getAsString(), urlObj.getAsString());
+                embed.setAuthor(replaceVariables(textObj.getAsString()), replaceVariables(urlObj.getAsString()));
             } else if (authorObj.has("text")) {
                 final JsonPrimitive textObj = authorObj.get("text").getAsJsonPrimitive();
-                embed.setAuthor(textObj.getAsString());
+                embed.setAuthor(replaceVariables(textObj.getAsString()));
             }
         }
         if (json.has("description")) {
             final JsonPrimitive descriptionObj = json.get("description").getAsJsonPrimitive();
-            embed.setDescription(descriptionObj.getAsString());
+            embed.setDescription(replaceVariables(descriptionObj.getAsString()));
+        }
+        if (json.has("fields")) {
+            final JsonArray fieldsObj = json.get("fields").getAsJsonArray();
+            fieldsObj.forEach(element -> {
+                final JsonObject fieldObj = element.getAsJsonObject();
+                if (fieldObj.has("title") && fieldObj.has("text") && fieldObj.has("inline")) {
+                    final JsonPrimitive titleObj = fieldObj.get("title").getAsJsonPrimitive();
+                    final JsonPrimitive textObj = fieldObj.get("text").getAsJsonPrimitive();
+                    final JsonPrimitive inlineObj = fieldObj.get("inline").getAsJsonPrimitive();
+                    embed.addField(replaceVariables(titleObj.getAsString()), replaceVariables(textObj.getAsString()), inlineObj.getAsBoolean());
+                }
+            });
         }
         if (json.has("image_url")) {
             final JsonPrimitive imageUrlObj = json.get("image_url").getAsJsonPrimitive();
-            embed.setImage(imageUrlObj.getAsString());
+            embed.setImage(replaceVariables(imageUrlObj.getAsString()));
         }
         if (json.has("footer")) {
             final JsonObject footerObj = json.get("footer").getAsJsonObject();
             if (footerObj.has("text") && footerObj.has("icon_url")) {
                 final JsonPrimitive textObj = footerObj.get("text").getAsJsonPrimitive();
                 final JsonPrimitive iconUrlObj = footerObj.get("icon_url").getAsJsonPrimitive();
-                embed.setFooter(textObj.getAsString(), iconUrlObj.getAsString());
+                embed.setFooter(replaceVariables(textObj.getAsString()), replaceVariables(iconUrlObj.getAsString()));
             } else if (footerObj.has("icon_url")) {
                 final JsonPrimitive textObj = footerObj.get("text").getAsJsonPrimitive();
-                embed.setFooter(textObj.getAsString());
+                embed.setFooter(replaceVariables(textObj.getAsString()));
             }
             if (footerObj.has("timestamp")) {
                 final JsonPrimitive timestampObj = footerObj.get("timestamp").getAsJsonPrimitive();
@@ -99,6 +116,23 @@ public class JsonEmbedBuilder {
             }
         }
         return embed;
+    }
+
+    /**
+     * Replace all common variables with content
+     *
+     * @param message message that content should be replaced
+     * @return formatted message
+     */
+    @SuppressWarnings("ConstantConditions")
+    private static @NotNull String replaceVariables(@NotNull String message) {
+        final JDA jda = DiscordBot.getInstance().getJDA();
+        if (message.contains("<botAvatar>"))
+            message = message.replace("<botAvatar>", jda.getSelfUser().getAvatarUrl());
+        if (message.contains("<infoDot>"))
+            message = message.replace("<infoDot>", SettingsConfiguration.getInfoDotEmoji().getAsMention());
+        message = message.replace("\\n", "\n");
+        return message;
     }
 
     /**
@@ -149,7 +183,7 @@ public class JsonEmbedBuilder {
         try {
             final InputStream headerInputStream = JsonEmbedBuilder.class.getClassLoader().getResourceAsStream("configurations/embed/templates/header.png");
             final BufferedImage image = ImageIO.read(headerInputStream);
-            final Font font = Font.createFont(Font.TRUETYPE_FONT, JsonEmbedBuilder.class.getClassLoader().getResourceAsStream("configurations/embed/templates/RubikMonoOne-Regular.ttf")).deriveFont(100f);
+            final Font font = Font.createFont(Font.TRUETYPE_FONT, JsonEmbedBuilder.class.getClassLoader().getResourceAsStream("configurations/embed/templates/RubikMonoOne-Regular.ttf")).deriveFont(65f);
             final Graphics graphics = image.getGraphics();
             graphics.setFont(font);
             Graphics2D graphics2D = (Graphics2D) graphics.create();

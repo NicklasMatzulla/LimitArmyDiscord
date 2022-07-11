@@ -2,6 +2,7 @@ package de.nicklasmatzulla.limitarmydiscord.discord;
 
 import de.nicklasmatzulla.limitarmydiscord.config.entries.ConfidentialConfiguration;
 import de.nicklasmatzulla.limitarmydiscord.discord.listener.GenericMessageReactionListener;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
@@ -14,7 +15,7 @@ import java.util.Arrays;
 
 public class DiscordBot {
     private static DiscordBot instance;
-    private ShardManager shardManager;
+    public ShardManager shardManager;
 
     /**
      * Initialize a new discord bot within all of his features
@@ -42,6 +43,15 @@ public class DiscordBot {
         } catch (LoginException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Get the first JDa
+     *
+     * @return {@link JDA}
+     */
+    public JDA getJDA() {
+        return this.shardManager.getShardById(0);
     }
 
     /**
